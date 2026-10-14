@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payroll Management System | Enterprise DB Dashboard</title>
+  <meta name="description" content="Modern enterprise payroll management dashboard connected to MySQL database.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="3"></rect>
+            <path d="M7 15h0M2 10h20"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h2>PayFlow<span>.db</span></h2>
+          <p>Payroll System</p>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-tab="employees">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Employees</span>
+        </button>
+        <button class="nav-item" data-tab="payrolls">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span>Payroll History</span>
+        </button>
+        <button class="nav-item" data-tab="run-payroll">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Run Payroll</span>
+        </button>
+        <button class="nav-item" data-tab="departments">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path><path d="M9 9h1"></path><path d="M9 13h1"></path><path d="M9 17h1"></path><path d="M14 9h1"></path><path d="M14 13h1"></path><path d="M14 17h1"></path></svg>
+          <span>Depts & Jobs</span>
+        </button>
+      </nav>
+
+      <!-- DB Status Pill in Sidebar -->
+      <div class="sidebar-footer">
+        <div class="db-pill">
+          <span class="pulse-indicator"></span>
+          <div class="db-info">
+            <div class="db-name" id="dbStatusName">payrollmanagementdb</div>
+            <div class="db-meta">MySQL 3306 • Connected</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header Bar -->
+      <header class="topbar">
+        <div class="header-title">
+          <h1 id="pageTitle">Payroll Overview</h1>
+          <p id="pageSubtitle">Real-time compensation analytics and database records</p>
+        </div>
+        <div class="header-actions">
+          <div class="clock-badge" id="liveClock">--:--:--</div>
+          <button class="btn btn-primary" id="btnQuickRunPayroll">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>Process Payroll</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="content-body">
+        
+        <!-- ============================================================== -->
+        <!-- TAB 1: DASHBOARD OVERVIEW -->
+        <!-- ============================================================== -->
+        <section id="tab-dashboard" class="tab-pane active">
+          <!-- Metrics Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon emerald">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Total Net Disbursed</span>
+                <h3 class="stat-value" id="statNetDisbursed">$0.00</h3>
+                <span class="stat-sub" id="statGrossDeduction">Gross: $0 • Deductions: $0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon indigo">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Active Employees</span>
+                <h3 class="stat-value" id="statActiveEmployees">0</h3>
+                <span class="stat-sub" id="statTotalEmployees">Total registered: 0</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon cyan">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Average Net Payout</span>
+                <h3 class="stat-value" id="statAvgSalary">$0.00</h3>
+                <span class="stat-sub">Across processed payroll runs</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon purple">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Departments & Roles</span>
+                <h3 class="stat-value" id="statDeptCount">0 Depts</h3>
+                <span class="stat-sub" id="statJobCount">0 Job Roles</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mid Section: Recent Activity & Dept Breakdown -->
+          <div class="dashboard-grid">
+            <!-- Recent Payroll Activity -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title">Recent Payroll Transactions</h3>
+                  <p class="panel-desc">Latest salary vouchers generated in the database</p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="app.switchTab('payrolls')">View All</button>
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Pay Date</th>
+                      <th>Employee</th>
+                      <th>Department</th>
+                      <th>Gross</th>
+                      <th>Deductions</th>
+                      <th>Net Pay</th>
+                      <th>Payslip</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recentPayrollsTableBody">
+                    <tr><td colspan="7" class="loading-cell">Loading records...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Department Budget Summary -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title">Department Distribution</h3>
+                  <p class="panel-desc">Staffing and base payroll allocation</p>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="app.switchTab('departments')">Manage</button>
+              </div>
+              <div class="dept-list" id="deptBreakdownList">
+                <div class="loading-cell">Loading departments...</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 2: EMPLOYEES DIRECTORY -->
+        <!-- ============================================================== -->
+        <section id="tab-employees" class="tab-pane">
+          <div class="panel">
+            <div class="panel-header flex-wrap">
+              <div class="filter-group">
+                <div class="search-box">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  <input type="text" id="employeeSearchInput" placeholder="Search by name, email, phone...">
+                </div>
+                <select id="employeeDeptFilter" class="select-box">
+                  <option value="">All Departments</option>
+                </select>
+                <select id="employeeStatusFilter" class="select-box">
+                  <option value="">All Statuses</option>
+                  <option value="Active">Active</option>
+                  <option value="On Leave">On Leave</option>
+                  <option value="Terminated">Terminated</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="btnOpenAddEmployee">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add Employee</span>
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Job Title</th>
+                    <th>Monthly Salary</th>
+                    <th>Hire Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="employeesTableBody">
+                  <tr><td colspan="8" class="loading-cell">Loading employee data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 3: PAYROLL HISTORY -->
+        <!-- ============================================================== -->
+        <section id="tab-payrolls" class="tab-pane">
+          <div class="panel">
+            <div class="panel-header flex-wrap">
+              <div class="filter-group">
+                <select id="payrollEmployeeFilter" class="select-box">
+                  <option value="">All Employees</option>
+                </select>
+                <button class="btn btn-outline btn-sm" id="btnRefreshPayrolls">Refresh</button>
+              </div>
+              <button class="btn btn-primary" onclick="app.switchTab('run-payroll')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>New Pay Run</span>
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Slip #</th>
+                    <th>Employee</th>
+                    <th>Pay Period</th>
+                    <th>Payment Date</th>
+                    <th>Gross</th>
+                    <th>Tax</th>
+                    <th>PF</th>
+                    <th>Health</th>
+                    <th>Total Deduct.</th>
+                    <th>Net Salary</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="payrollLedgerTableBody">
+                  <tr><td colspan="11" class="loading-cell">Loading payroll records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 4: RUN / PROCESS PAYROLL -->
+        <!-- ============================================================== -->
+        <section id="tab-run-payroll" class="tab-pane">
+          <div class="run-payroll-grid">
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title">Execute Payroll Run</h3>
+                  <p class="panel-desc">Process compensation with statutory deduction calculations</p>
+                </div>
+              </div>
+              
+              <form id="payrollRunForm" class="custom-form">
+                <div class="form-group">
+                  <label for="runEmployeeSelect">Target Personnel</label>
+                  <select id="runEmployeeSelect" class="form-input" required>
+                    <option value="ALL">🌟 All Active Employees (Batch Processing)</option>
+                  </select>
+                  <small class="form-help">Select an individual employee or run simultaneously for the entire active staff.</small>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="runPeriodStart">Period Start Date</label>
+                    <input type="date" id="runPeriodStart" class="form-input" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="runPeriodEnd">Period End Date</label>
+                    <input type="date" id="runPeriodEnd" class="form-input" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="runPayDate">Payment Date</label>
+                    <input type="date" id="runPayDate" class="form-input" required>
+                  </div>
+                </div>
+
+                <div class="divider">
+                  <span>Statutory Deduction Rates</span>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="rateTax">Income Tax (%)</label>
+                    <input type="number" id="rateTax" class="form-input" value="10" min="0" max="50" step="0.5">
+                  </div>
+                  <div class="form-group">
+                    <label for="ratePF">Provident Fund (%)</label>
+                    <input type="number" id="ratePF" class="form-input" value="4" min="0" max="25" step="0.5">
+                  </div>
+                  <div class="form-group">
+                    <label for="rateHealth">Health Insurance (%)</label>
+                    <input type="number" id="rateHealth" class="form-input" value="2" min="0" max="20" step="0.5">
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline" id="btnCalcPreview">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span>Preview Calculations</span>
+                  </button>
+                  <button type="submit" class="btn btn-primary" id="btnSubmitRunPayroll">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <span>Commit Payroll to Database</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Live Calculation Preview Card -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title">Calculation Preview</h3>
+                  <p class="panel-desc">Projected disbursements before committing to MySQL</p>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>Gross</th>
+                      <th>Deductions</th>
+                      <th>Net Payout</th>
+                    </tr>
+                  </thead>
+                  <tbody id="previewPayrollTableBody">
+                    <tr><td colspan="4" class="empty-cell">Click "Preview Calculations" to see simulated numbers.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="preview-totals" id="previewTotalsBar" style="display: none;">
+                <div>Total Gross: <strong id="prevTotalGross">$0.00</strong></div>
+                <div>Total Deductions: <strong id="prevTotalDeductions" class="text-rose">$0.00</strong></div>
+                <div>Net Payout: <strong id="prevTotalNet" class="text-emerald">$0.00</strong></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 5: DEPARTMENTS & JOBS -->
+        <!-- ============================================================== -->
+        <section id="tab-departments" class="tab-pane">
+          <div class="two-col-grid">
+            <!-- Departments Panel -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title">Departments</h3>
+                  <p class="panel-desc">Manage business units and organizational teams</p>
+                </div>
+                <button class="btn btn-primary btn-sm" id="btnOpenAddDept">+ Add Dept</button>
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Department Name</th>
+                      <th>Employees</th>
+                      <th>Active</th>
+                      <th>Est. Budget</th>
+                    </tr>
+                  </thead>
+                  <tbody id="departmentsTableBody">
+                    <tr><td colspan="5" class="loading-cell">Loading departments...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Jobs & Salaries Panel -->
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title">Job Titles & Base Pay</h3>
+                  <p class="panel-desc">Standard compensation brackets</p>
+                </div>
+                <button class="btn btn-primary btn-sm" id="btnOpenAddJob">+ Add Job</button>
+              </div>
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Job Title</th>
+                      <th>Base Salary</th>
+                      <th>Staff Count</th>
+                    </tr>
+                  </thead>
+                  <tbody id="jobsTableBody">
+                    <tr><td colspan="4" class="loading-cell">Loading job roles...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 1: ADD / EDIT EMPLOYEE -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="employeeModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="employeeModalTitle">Add New Employee</h3>
+        <button class="btn-close" id="btnCloseEmployeeModal">&times;</button>
+      </div>
+      <form id="employeeForm" class="modal-body custom-form">
+        <input type="hidden" id="empEditId">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="empFirstName">First Name *</label>
+            <input type="text" id="empFirstName" class="form-input" required placeholder="e.g. John">
+          </div>
+          <div class="form-group">
+            <label for="empLastName">Last Name *</label>
+            <input type="text" id="empLastName" class="form-input" required placeholder="e.g. Doe">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="empEmail">Email Address *</label>
+            <input type="email" id="empEmail" class="form-input" required placeholder="john.doe@company.com">
+          </div>
+          <div class="form-group">
+            <label for="empPhone">Phone Number</label>
+            <input type="text" id="empPhone" class="form-input" placeholder="555-0199">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="empDeptSelect">Department *</label>
+            <select id="empDeptSelect" class="form-input" required></select>
+          </div>
+          <div class="form-group">
+            <label for="empJobSelect">Job Role *</label>
+            <select id="empJobSelect" class="form-input" required></select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="empPrimarySalary">Custom Salary ($ / month)</label>
+            <input type="number" id="empPrimarySalary" class="form-input" step="0.01" placeholder="Leave empty for job base pay">
+            <small class="form-help">If empty, defaults to job title base salary.</small>
+          </div>
+          <div class="form-group">
+            <label for="empHireDate">Hire Date *</label>
+            <input type="date" id="empHireDate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="empStatus">Employment Status</label>
+            <select id="empStatus" class="form-input">
+              <option value="Active">Active</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Terminated">Terminated</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btnCancelEmployeeModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveEmployee">Save Employee</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 2: ADD DEPARTMENT -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="departmentModal">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <h3>Create Department</h3>
+        <button class="btn-close" id="btnCloseDeptModal">&times;</button>
+      </div>
+      <form id="departmentForm" class="modal-body custom-form">
+        <div class="form-group">
+          <label for="newDeptName">Department Name *</label>
+          <input type="text" id="newDeptName" class="form-input" placeholder="e.g. Marketing & Growth" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btnCancelDeptModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Department</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 3: ADD JOB -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="jobModal">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <h3>Create Job Title</h3>
+        <button class="btn-close" id="btnCloseJobModal">&times;</button>
+      </div>
+      <form id="jobForm" class="modal-body custom-form">
+        <div class="form-group">
+          <label for="newJobTitle">Job Title *</label>
+          <input type="text" id="newJobTitle" class="form-input" placeholder="e.g. Product Designer" required>
+        </div>
+        <div class="form-group">
+          <label for="newJobBaseSalary">Base Monthly Salary ($) *</label>
+          <input type="number" id="newJobBaseSalary" class="form-input" step="0.01" placeholder="5000.00" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btnCancelJobModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Job</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 4: OFFICIAL PRINTABLE PAYSLIP -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="payslipModal">
+    <div class="modal-card modal-lg payslip-container">
+      <div class="modal-header no-print">
+        <div class="flex-center gap-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <h3 id="payslipModalTitle">Employee Payslip Voucher</h3>
+        </div>
+        <div class="flex-center gap-2">
+          <button class="btn btn-primary btn-sm" id="btnPrintPayslip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Print / Save PDF</span>
+          </button>
+          <button class="btn-close" id="btnClosePayslipModal">&times;</button>
+        </div>
+      </div>
+
+      <!-- Printable Payslip Document Area -->
+      <div class="payslip-document" id="printablePayslipArea">
+        <div class="payslip-header">
+          <div class="corp-branding">
+            <h2>ENTERPRISE PAYROLL CORPORATION</h2>
+            <p>100 Corporate Plaza, Suite 400 • Automated Payroll Ledger</p>
+            <p class="corp-meta">Database: <code>payrollmanagementdb</code> | Transaction Reference</p>
+          </div>
+          <div class="slip-meta-box">
+            <div class="slip-badge">OFFICIAL SALARY SLIP</div>
+            <div class="slip-id" id="slipIdDisplay">VOUCHER #PR-000</div>
+            <div class="slip-date" id="slipDateDisplay">Date: --/--/----</div>
+          </div>
+        </div>
+
+        <div class="payslip-employee-grid">
+          <div class="info-cell">
+            <span class="info-label">Employee Name</span>
+            <span class="info-val" id="slipEmpName">-</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Employee ID</span>
+            <span class="info-val" id="slipEmpId">-</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Department</span>
+            <span class="info-val" id="slipEmpDept">-</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Designation / Role</span>
+            <span class="info-val" id="slipEmpJob">-</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Email</span>
+            <span class="info-val" id="slipEmpEmail">-</span>
+          </div>
+          <div class="info-cell">
+            <span class="info-label">Pay Period</span>
+            <span class="info-val" id="slipPayPeriod">-</span>
+          </div>
+        </div>
+
+        <!-- Earnings & Deductions Tables -->
+        <div class="payslip-breakdown-grid">
+          <div class="breakdown-card">
+            <h4>EARNINGS</h4>
+            <table class="slip-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th class="text-right">Amount ($)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Base Gross Salary</td>
+                  <td class="text-right" id="slipGrossSalary">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Allowances & Benefits</td>
+                  <td class="text-right">$0.00</td>
+                </tr>
+                <tr class="table-subtotal">
+                  <td><strong>Total Gross Earnings</strong></td>
+                  <td class="text-right"><strong id="slipTotalGross">$0.00</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="breakdown-card">
+            <h4>STATUTORY DEDUCTIONS</h4>
+            <table class="slip-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th class="text-right">Amount ($)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Income Tax (Withheld)</td>
+                  <td class="text-right text-rose" id="slipTax">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Provident Fund (PF)</td>
+                  <td class="text-right text-rose" id="slipPF">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Health Insurance</td>
+                  <td class="text-right text-rose" id="slipHealth">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Other Statutory Deductions</td>
+                  <td class="text-right text-rose" id="slipOther">$0.00</td>
+                </tr>
+                <tr class="table-subtotal">
+                  <td><strong>Total Deductions</strong></td>
+                  <td class="text-right text-rose"><strong id="slipTotalDeductions">$0.00</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Net Payable Grand Banner -->
+        <div class="net-salary-banner">
+          <div>
+            <span class="net-title">NET SALARY PAYABLE</span>
+            <p class="net-sub">Direct disbursement credit to employee payroll account</p>
+          </div>
+          <div class="net-amount" id="slipNetSalary">$0.00</div>
+        </div>
+
+        <div class="payslip-signature-row">
+          <div class="sig-line">
+            <div class="line"></div>
+            <span>Authorized HR & Finance Signature</span>
+          </div>
+          <div class="sig-line">
+            <div class="line"></div>
+            <span>Employee Acknowledgment</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
