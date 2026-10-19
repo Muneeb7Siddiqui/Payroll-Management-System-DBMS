@@ -39,7 +39,7 @@ async function testConnection() {
         const rootConn = await mysql.createConnection({
           host: process.env.DB_HOST || 'localhost',
           user: process.env.DB_USER || 'root',
-          password: process.env.DB_PASSWORD || 'Muneeb3340.',
+          password: process.env.DB_PASSWORD || 'MYSQL PASSWORD.',
           port: Number(process.env.DB_PORT) || 3306,
         });
         await rootConn.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\``);
